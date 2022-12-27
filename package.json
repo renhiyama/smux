@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "postinstall": "./geticons.sh",
+    "icons": "./geticons.sh",
     "build": "next build",
     "start": "next start",
     "tw:watch": "tailwindcss -i ./css.css -o ./public/build.css --watch",
