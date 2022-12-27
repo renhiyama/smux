@@ -57,14 +57,9 @@ self.addEventListener("install", (e) => {
 });
 
 self.addEventListener("fetch", event => {
-  event.request.path = "/" + event.request.url.split("/").splice(3).join("/");
-  if (event.request.path.startsWith("/theme-") || event.request.path.startsWith("/mode-") || event.request.path.startsWith("/worker-")) {
-    event.reequest = new Request(`https://cdn.jsdelivr.net/npm/ace-builds@1.14.0/src-min-noconflict${event.request.path}`);
-  };
-
   event.respondWith(
     caches.match(event.request).then(response => {
-      return response || fetch(event.reequest || event.request);
+      return response || fetch(event.request);
     })
   );
 });
