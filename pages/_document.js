@@ -5,9 +5,7 @@ export default function Document() {
     <Html>
       <Head>
         <link rel="stylesheet" href="/build.css"></link>
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" href="/logos/192x192.png" />
-        </Head>
+      </Head>
       <body className="min-h-screen bg-slate-900 no-scrollbar overflow-y-hidden">
         <Main />
         <NextScript />

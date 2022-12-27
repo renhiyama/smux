@@ -7,9 +7,8 @@ export default function Workspace(){
   return(
     <>
     <Head>
-        <title>Smux</title>
+        <title>Smux Editor</title>
       </Head>
-      <Loader />
       <Navbar />
       <Area page="workspace">
         <h1 className="text-white">Hello World</h1>

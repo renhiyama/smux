@@ -13,28 +13,40 @@ export default function Loader() {
       if (navigator?.serviceWorker?.controller) {
         //check if service worker is updated
         if ((await navigator.serviceWorker.getRegistration()).waiting) {
-          loader.innerText = "Please Close This Tab & Open A New One To Proceed.";
+          loader.innerText = "Please Close This Tab & Open A New One To Finish Service Worker Update.";
+          setTimeout(()=>{
+            loaddiv.classList.remove("hidden");
+            loaddiv.classList.remove("opacity-0");
+            loaddiv.classList.add("opacity-100");
+          }, 1500);
+          
         }
-        loader.innerText = "Starting...";
-        let loaddiv = document.getElementById("loaddiv");
-        loaddiv.classList.remove("opacity-100");
-        loaddiv.classList.add("opacity-0");
-         setTimeout(() => {
-           loaddiv.classList.add("hidden");
-       }, 1000);
+        else {
+          loader.innerText = "Starting...";
+          let loaddiv = document.getElementById("loaddiv");
+          loaddiv.classList.remove("opacity-100");
+          loaddiv.classList.add("opacity-0");
+          setTimeout(() => {
+            loaddiv.classList.add("hidden");
+          }, 1000);
+        }
       }
       else {
         loader.innerText = "Service worker is available. Installing...";
         //register service worker
         navigator?.serviceWorker?.register("/sw.js").then((reg) => {
-          loader.innerText = "Activating...";
-          //if the service worker is installed, then reload the page
-          window.location.reload();
+          loader.innerText = "Starting...";
+          let loaddiv = document.getElementById("loaddiv");
+          loaddiv.classList.remove("opacity-100");
+          loaddiv.classList.add("opacity-0");
+          setTimeout(() => {
+            loaddiv.classList.add("hidden");
+          }, 1000);
         });
       }
     })();
   })
-  return (<div id="loaddiv" className="z-100 h-screen w-screen bg-slate-900 transition-opacity duration-500 opacity-100">
+  return (<div id="loaddiv" className="z-[200] h-screen w-screen bg-slate-900 transition-opacity duration-500 opacity-100">
     {/* center logo horizontally and vertically */}
     <div className="flex justify-center items-center h-screen">
       <div className="mx-auto text-center">

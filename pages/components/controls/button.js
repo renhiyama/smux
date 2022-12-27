@@ -48,12 +48,12 @@ export default function Button({ name, onClick }) {
     hide();
   }
   return (
-    <div ref={buttonRef} onMouseEnter={show} onMouseLeave={hide}>
+    <div ref={buttonRef} onMouseEnter={show} onMouseLeave={hide} >
       <button onClick={runandhide}>
         {icons[name]}
       </button>
       {showTooltip && <div
-        className="absolute bg-black/50 text-white font-bold text-md capitalize rounded-md p-2 shadow-lg shadow-black/50" style={tooltipPosition}>
+        className="z-[100] backdrop-blur-xl absolute bg-black/50 text-white font-bold text-md capitalize rounded-md p-2 shadow-lg shadow-black/50">
         {name.replaceAll("-", " ")}</div>}
     </div>
   )
