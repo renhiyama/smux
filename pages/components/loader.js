@@ -39,7 +39,7 @@ export default function Loader() {
     <div className="flex justify-center items-center h-screen">
       <div className="mx-auto text-center">
         <Image
-          src="/logos/transparent.svg" alt="EditerMX Logo" height={200} width={200}
+          src="/logos/transparent.svg" alt="Smux Logo" height={200} width={200}
           className="w-24 h-24 lg:w-48 lg:h-48 mx-auto animate-pulse" priority="high"
         />
         <p id="loader" className="font-bold text-gray-300 text-xl pt-8">Loading...</p>

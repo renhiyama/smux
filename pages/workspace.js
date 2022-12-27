@@ -7,7 +7,7 @@ export default function Workspace(){
   return(
     <>
     <Head>
-        <title>EditerMX</title>
+        <title>Smux</title>
       </Head>
       <Loader />
       <Navbar />

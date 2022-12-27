@@ -1,6 +1,6 @@
 {
-  "short_name": "EditerMX",
-  "name": "EditerMX: Editor for Termux",
+  "short_name": "Smux",
+  "name": "Smux: Editor for Termux",
   "icons": [
     {
       "src": "/logos/512x512.png",
@@ -23,5 +23,5 @@
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "scope": "/",
-  "description": "EditerMX is an editor with first class mobile support for Termux."
+  "description": "Smux is an editor with first class mobile support for Termux."
 }

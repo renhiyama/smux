@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>EditerMX</title>
+        <title>Smux</title>
       </Head>
       <Loader />
       <Navbar />
