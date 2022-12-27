@@ -19,7 +19,6 @@ export default function Loader() {
             loaddiv.classList.remove("opacity-0");
             loaddiv.classList.add("opacity-100");
           }, 1500);
-          
         }
         else {
           loader.innerText = "Starting...";

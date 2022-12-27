@@ -30,3 +30,6 @@ yarn-error.log*
 .env.production.local
 /public/fileicons
 /public/build.css
+/public/workbox*.js
+/public/fallback*.js
+public/sw.js
