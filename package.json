@@ -2,9 +2,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "postinstall": "./geticons.sh",
     "build": "next build",
     "start": "next start",
-    "tw": "tailwindcss -i ./css.css -o ./public/build.css --watch"
+    "tw:watch": "tailwindcss -i ./css.css -o ./public/build.css --watch",
+    "tw": "tailwindcss -i ./css.css -o ./public/build.css"
   },
   "dependencies": {
     "autoprefixer": "^10.4.13",

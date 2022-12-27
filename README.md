@@ -16,6 +16,5 @@ Join our [Discord Server](https://dscrdly.com/server) to partipate in discussion
 ### How to Run
 1. Clone the repository
 2. Download Nodejs and download the dependencies
-3. Run `npm run tw` to build the css. Ctrl+C to stop the process.
-4. `./geticons.sh` to download the icons.
-5. `npm run dev` to start the development server.
+3. Run `npm run tw` to build the css.
+6. `npm run dev` to start the development server.
