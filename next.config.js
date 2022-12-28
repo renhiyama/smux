@@ -1,7 +1,7 @@
 const withPWA = require('next-pwa')({
-  dest: 'public'
+  dest: 'public',
 })
 
-module.exports = withPWA({
+module.exports = (process.env.NODE_ENV=="production")?withPWA({
   // next.js config
-})
+}):{}

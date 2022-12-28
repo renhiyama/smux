@@ -31,5 +31,7 @@ yarn-error.log*
 /public/fileicons
 /public/build.css
 /public/workbox*.js
+/public/workbox*.js.map
 /public/fallback*.js
 public/sw.js
+public/sw.js.map

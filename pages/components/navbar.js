@@ -6,7 +6,6 @@ export default function Navbar({}){
   const router = useRouter();
   useEffect(()=>{
     //when a user clicks sidebar button, text-cyan-500 is added to the button
-    
     let buttons = document.querySelectorAll("#nav button");
     buttons.forEach((button)=>{
       button.addEventListener("click", (e)=>{

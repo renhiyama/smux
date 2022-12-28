@@ -1,6 +1,18 @@
 import { useEffect } from "react";
 import Image from "next/image";
 export default function Loader() {
+  const env = process.env.NODE_ENV;
+  if(env=="development"){
+    useEffect(()=>{
+      let loaddiv = document.getElementById("loaddiv");
+          loaddiv.classList.remove("opacity-100");
+          loaddiv.classList.add("opacity-0");
+          setTimeout(() => {
+            loaddiv.classList.add("hidden");
+          }, 1000);
+    })
+  }
+  else{
   useEffect(() => {
     (async () => {
       let loader = document.getElementById("loader");
@@ -45,6 +57,7 @@ export default function Loader() {
       }
     })();
   })
+}
   return (<div id="loaddiv" className="z-[200] h-screen w-screen bg-slate-900 transition-opacity duration-500 opacity-100">
     {/* center logo horizontally and vertically */}
     <div className="flex justify-center items-center h-screen">
