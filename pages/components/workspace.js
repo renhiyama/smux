@@ -27,7 +27,7 @@ export default function Workspace({ }) {
   return (<>
     <div className="px-4 py-4">
       <h3 className="text-sm font-semibold uppercase">Workspace</h3>
-      <div className="flex">
+      <div className="lg:flex">
         <div className="mt-4 flex bg-slate-900 w-full lg:w-96 items-center overflow-hidden p-2 rounded-md border-2 border-slate-700 focus-within:border-blue-500/70">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
             className="w-5 h-5">
@@ -35,7 +35,7 @@ export default function Workspace({ }) {
           </svg>
           <input className="px-1 bg-slate-900 focus:outline-none w-full" placeholder="Search Your Recent Projects" />
         </div>
-        <div className="ml-auto mt-4 grid grid-cols-2 gap-4">
+        <div className="ml-auto mt-4 grid lg:grid-cols-2 gap-4">
           <button className="flex bg-indigo-600 py-2 px-4 items-center rounded-md text-white font-bold">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
               className="w-6 h-6 mr-2">
