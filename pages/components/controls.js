@@ -2,7 +2,7 @@ import ControlButton from "./controls/button";
 import Image from "next/image";
 export default function Controls() {
   return (
-    <div id="controls" className="h-full lg:max-w-sm py-4 col-span-8 lg:col-span-2 border-r border-slate-700">
+    <div id="controls" className="h-full py-4 col-span-8 lg:col-span-2 border-r border-slate-700">
       <div className="flex px-4">
         <h3 className="text-sm font-semibold uppercase mr-auto">Files</h3>
         <ControlButton name="search" />

@@ -25,7 +25,7 @@ export default function EditorArea({ }) {
   //toggleControls with react
   const [controlsOpen, setControlsToggle] = useState(false);
   useEffect(() => {
-    let mobileScreen = () => { return (Math.min(window.screen.width, window.screen.height) < 768) };
+    let mobileScreen = () => { return (Math.min(window.screen.width, window.screen.height) < 800) };
     let whatisnow = mobileScreen();
     let cp = document.getElementById("controls");
     let area = document.getElementById("area");
@@ -35,12 +35,14 @@ export default function EditorArea({ }) {
     (controlsOpen) ? wa.classList.remove("lg:col-span-8") : wa.classList.add("lg:col-span-8");
     console.log(controlsOpen ? "unhide" : "hide");
     //fix for mobile screens
-    if ((Math.min(window.screen.width, window.screen.height) < 768)) {
+    if (mobileScreen()) {
       //we opened control screen, so we will hide editor ;)
       //!controlsOpen = we currently opened controls
       if (!controlsOpen) {
         console.log("show controls");
+        wa.classList.remove("col-span-10");
         wa.classList.add("col-span-2");
+        wa.classList.add("brightness-50");
         area.classList.add("ml-[3.2rem]");
         nav.classList.remove("hidden");
       }
@@ -48,12 +50,14 @@ export default function EditorArea({ }) {
         console.log("show editor");
         area.classList.remove("ml-[3.2rem]");
         wa.classList.remove("col-span-2");
+        wa.classList.remove("brightness-50");
+        wa.classList.add("col-span-10");
         nav.classList.add("hidden");
       }
     }
     let resizeListen = function () {
       //reset to default
-      if(whatisnow != mobileScreen()){
+      if (whatisnow != mobileScreen()) {
         router.push("/fakerefresh");
       }
     }
@@ -65,9 +69,20 @@ export default function EditorArea({ }) {
   let toggleControls = function () {
     setControlsToggle(!controlsOpen);
   }
+  let toggleControlsIfDark = function (e) {
+    //stop propagation if el has brightness-50 class
+    console.log("clicked");
+    let el = document.getElementById("workarea");
+    if (el.classList.contains("brightness-50")) {
+      console.log("touched");
+      e.stopPropagation();
+      toggleControls();
+    }
+  }
   return (
     <>
-      <div id="workarea" className="flex flex-col h-full col-span-10 lg:col-span-8 bg-slate-800">
+      <div id="workarea" className="flex flex-col h-full col-span-10 lg:col-span-8 bg-slate-800"
+        onClick={toggleControlsIfDark}>
         <div className="mx-auto py-2 lg:py-8 border-b border-slate-700 bg-slate-900 w-full">
           <button onClick={toggleControls} className="p-4 lg:hidden">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
