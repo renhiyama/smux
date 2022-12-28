@@ -33,13 +33,11 @@ export default function EditorArea({ }) {
     (controlsOpen) ? cp.classList.add("hidden") : cp.classList.remove("hidden");
     let wa = document.getElementById("workarea");
     (controlsOpen) ? wa.classList.remove("lg:col-span-8") : wa.classList.add("lg:col-span-8");
-    console.log(controlsOpen ? "unhide" : "hide");
     //fix for mobile screens
     if (mobileScreen()) {
       //we opened control screen, so we will hide editor ;)
       //!controlsOpen = we currently opened controls
       if (!controlsOpen) {
-        console.log("show controls");
         wa.classList.remove("col-span-10");
         wa.classList.add("col-span-2");
         wa.classList.add("brightness-50");
@@ -47,7 +45,6 @@ export default function EditorArea({ }) {
         nav.classList.remove("hidden");
       }
       else {
-        console.log("show editor");
         area.classList.remove("ml-[3.2rem]");
         wa.classList.remove("col-span-2");
         wa.classList.remove("brightness-50");
@@ -71,10 +68,8 @@ export default function EditorArea({ }) {
   }
   let toggleControlsIfDark = function (e) {
     //stop propagation if el has brightness-50 class
-    console.log("clicked");
     let el = document.getElementById("workarea");
     if (el.classList.contains("brightness-50")) {
-      console.log("touched");
       e.stopPropagation();
       toggleControls();
     }
