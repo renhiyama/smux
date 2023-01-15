@@ -5,56 +5,64 @@ export default function Workspace({}) {
   let [isOpen, setIsOpen] = useState(false);
   let [projects, setProjects] = useState([]);
   useEffect(() => {
-    if (
-      localStorage.getItem("host") !== null &&
-      localStorage.getItem("port") !== null
-    ) {
-      globalThis.ws = new WebSocket(
-        `ws://${localStorage.getItem("host")}:${localStorage.getItem("port")}`
-      );
-      ws.addEventListener("message", (data) => {
-        data = JSON.parse(data.data);
-        if (data.type === "projects") {
-          setProjects(data.projects);
+    (async () => {
+      try {
+        //if localstorage has host and port, connect to it
+        if (localStorage.getItem("host") && localStorage.getItem("port")) {
+          let f = await fetch(
+            `http://${localStorage.getItem("host")}:${localStorage.getItem(
+              "port"
+            )}`
+          );
+          let data = await f.json();
+          if (data.message === "ONLINE") {
+            let $ = document.querySelector.bind(document);
+            $("#cbtn").parentElement.classList.add("bg-green-500");
+            $("#cbtn").parentElement.classList.remove("bg-indigo-600");
+            $("#cbtn").innerText = "Connected!";
+            f = await fetch(
+              `http://${localStorage.getItem("host")}:${localStorage.getItem(
+                "port"
+              )}/projects`
+            );
+            data = await f.json();
+            setProjects(data.projects);
+            //add event listener to connect button
+            $("#cbtn").parentElement.addEventListener("click", () => {
+              //if connected, ask for confirmation to disconnect
+              let c;
+              if ($("#cbtn").innerText == "Connected!") {
+                $("#cbtn").innerText = "Disconnect?";
+                $("#cbtn").parentElement.classList.add("bg-red-500");
+                $("#cbtn").parentElement.classList.remove("bg-green-500");
+                c = setTimeout(() => {
+                  $("#cbtn").innerText = "Connected!";
+                  $("#cbtn").parentElement.classList.add("bg-green-500");
+                  $("#cbtn").parentElement.classList.remove("bg-red-500");
+                  c = null;
+                }, 2000);
+              } else if ($("#cbtn").innerText == "Disconnect?") {
+                //if confirmed, disconnect
+                $("#cbtn").innerText = "Connect Termux";
+                $("#cbtn").parentElement.classList.add("bg-indigo-600");
+                $("#cbtn").parentElement.classList.remove("bg-red-500");
+                clearTimeout(c);
+                localStorage.removeItem("host");
+                localStorage.removeItem("port");
+                setProjects([]);
+              }
+            });
+          }
         }
-        if (data.type === "connected") {
-          //alert("Connected to server!");
-          let $ = document.querySelector.bind(document);
-          $("#cbtn").innerText = "Connected!";
-          //get parent element of cbtn
-          $("#cbtn").parentElement.classList.add("bg-green-600");
-          $("#cbtn").parentElement.classList.remove("bg-indigo-600");
-          $("#cbtn").parentElement.addEventListener("click", () => {
-            if ($("#cbtn").innerText === "Connected!") {
-              $("#cbtn").innerText = "Disconnect?";
-              $("#cbtn").parentElement.classList.add("bg-red-600");
-              $("#cbtn").parentElement.classList.remove("bg-green-600");
-            } else {
-              $("#cbtn").innerText = "Connect Termux";
-              $("#cbtn").parentElement.classList.add("bg-indigo-600");
-              $("#cbtn").parentElement.classList.remove("bg-red-600");
-              localStorage.removeItem("host");
-              localStorage.removeItem("port");
-              globalThis?.ws?.close();
-              globalThis.ws = null;
-              setProjects([]);
-            }
-          });
-        }
-      });
-      ws.addEventListener("open", () => {
-        ws.send(JSON.stringify({ type: "projects" }));
-      });
-    }
-    return () => {
-      globalThis?.ws?.close();
-    };
+      } catch (e) {}
+    })();
   }, [
     globalThis?.localStorage?.getItem("host"),
     globalThis?.localStorage?.getItem("port"),
   ]);
 
   function closeModal() {
+    let $ = document.querySelector.bind(document);
     setIsOpen(false);
   }
 
@@ -64,37 +72,42 @@ export default function Workspace({}) {
       setIsOpen(true);
     }
   }
-  function connectServer() {
+  async function connectServer() {
     let $ = document.querySelector.bind(document);
-    if (globalThis.ws) {
-      console.log("[WS] Already connected. Disconnecting...");
-      globalThis.ws.close();
-    }
-    globalThis.ws = new WebSocket(
-      `ws://${$('input[placeholder="HOST"]').value}:${
-        $('input[placeholder="PORT"]').value
-      }`
-    );
-    //save to localstorage
-    localStorage.setItem("host", $('input[placeholder="HOST"]').value);
-    localStorage.setItem("port", $('input[placeholder="PORT"]').value);
-    ws.addEventListener("message", function incoming(data) {
-      data = JSON.parse(data.data);
-      if (data.type === "connected") {
+    try {
+      let f = await fetch(`http://${$("#host").value}:${$("#port").value}/`);
+      f = await f.json();
+      if (f.message === "ONLINE") {
+        //save to localstorage
+        localStorage.setItem("host", $('input[placeholder="HOST"]').value);
+        localStorage.setItem("port", $('input[placeholder="PORT"]').value);
         $('input[placeholder="HOST"]').disabled = true;
         $('input[placeholder="PORT"]').disabled = true;
+        $("#cbtn").innerText = "Connected!";
+        $("#cbtn").parentElement.classList.add("bg-green-500");
+        $("#cbtn").parentElement.classList.remove("bg-indigo-600");
         $("button#connector").disabled = true;
         $("button#connector").innerText = "Connected!";
         $("button#connector").classList.add("bg-green-500");
-        $("button#connector").classList.remove("bg-blue-500");
-        $("button#connector").classList.remove("hover:bg-blue-600");
-        $("button#connector").classList.add("hover:bg-green-600");
+        $("button#connector").classList.remove("bg-indigo-600");
+        f = await fetch(
+          `http://${$("#host").value}:${$("#port").value}/projects`
+        );
+        f = await f.json();
+        setProjects(f.projects);
         setTimeout(() => {
           closeModal();
         }, 1000);
       }
-      ws.close();
-    });
+    } catch (e) {
+      window.Toast(
+        "Error connecting to server",
+        "danger",
+        `Failed to connect: ${localStorage.getItem(
+          "host"
+        )}:${localStorage.getItem("port")}`
+      );
+    }
   }
 
   function selectProject(project) {
@@ -230,7 +243,7 @@ export default function Workspace({}) {
                         width={24}
                         height={24}
                         viewBox="0 0 24 24"
-                        stroke-width={2}
+                        strokeWidth={2}
                         stroke="currentColor"
                         fill="none"
                         strokeLinecap="round"
@@ -289,10 +302,12 @@ export default function Workspace({}) {
                     <input
                       className="mt-4 bg-gray-900 rounded-md focus:outline-none border-2 border-slate-700 focus:border-indigo-700 text-slate-300 py-2 px-4"
                       placeholder="PORT"
+                      id="port"
                     ></input>
                     <input
                       className="mt-4 bg-gray-900 rounded-md focus:outline-none border-2 border-slate-700 focus:border-indigo-700 text-slate-300 py-2 px-4"
                       defaultValue="localhost"
+                      id="host"
                       placeholder="HOST"
                     ></input>
                   </div>
