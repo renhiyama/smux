@@ -22,7 +22,7 @@ else
 	echo "[*] Installing Smux..."6
 	# clone the repo
 	git clone https://github.com/renhiyama/smux.git ~/.smux
-elif
+fi
 cd ~/.smux/server
 echo "[*] Installing Dependencies..."
 npm install
