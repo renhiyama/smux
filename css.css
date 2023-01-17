@@ -30,3 +30,7 @@ img.emoji {
     @apply w-6 h-6 stroke-2 mx-auto mb-7 cursor-pointer text-slate-400;
   }
 }
+
+.ace_mobile-menu {
+    display: none;
+}

@@ -66,7 +66,7 @@ export default function Controls() {
           <span className="text-sm">{project || "No Active Project"}</span>
         </a>
         <ul className={`${isExpanded ? "" : "hidden"}`}>
-          <Directory key={"/"} />
+          <Directory key={"__never_gonna_give_you_up__"} />
         </ul>
       </div>
     </div>
@@ -127,18 +127,60 @@ function Directory({ path }) {
       });
     })();
   }, []);
+  async function openFile(path) {
+    if (localStorage.getItem("currentFile") != null) {
+      //save it
+      let project = globalThis?.localStorage?.getItem("project");
+      let currentFile = globalThis?.localStorage?.getItem("currentFile");
+      let content = editor.getValue();
+      await fetch(
+        `http://${localStorage.getItem("host")}:${localStorage.getItem(
+          "port"
+        )}/projects/${encodeURIComponent(project)}/file/${encodeURIComponent(
+          currentFile
+        )}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content,
+          }),
+        }
+      ).then(() => {});
+    }
+    let f = await fetch(
+      `http://${localStorage.getItem("host")}:${localStorage.getItem(
+        "port"
+      )}/projects/${encodeURIComponent(
+        localStorage.getItem("project")
+      )}/file/${encodeURIComponent(path)}`
+    ).then((res) => res.json());
+    window.editor.setValue(f.content);
+    window.editor.gotoLine(1);
+    localStorage.setItem("currentFile", path);
+  }
   return (
-    <ul className="ml-2">
+    <ul className="ml-2" key={"_path__" + path}>
       {folders?.map((folder) => {
         return (
-          <>
-            <Folder folder={folder} path={path} />
-          </>
+          <Folder
+            folder={folder}
+            path={path}
+            key={"folder_comp__" + (path ? path + "/" + folder : folder)}
+          />
         );
       })}
       {files?.map((file) => {
         return (
-          <li className="text-slate-300 px-4">
+          <li
+            className="text-slate-300 px-4 hover:bg-slate-700"
+            onClick={() => {
+              openFile(path ? path + "/" + file : file);
+            }}
+            key={"file_comp__" + (path ? path + "/" + file : file)}
+          >
             <span className="flex border-l border-slate-500 pl-2 py-1">
               <Image
                 src="/fileicons/default_file.svg"
@@ -162,11 +204,15 @@ function Folder({ folder, path }) {
     setIsExpanded(!isExpanded);
   }
   return (
-    <>
-      <li className="hover:bg-slate-700 text-slate-300 px-4" onClick={toggle}>
+    <div key={"_ke_" + (path ? path + "/" + folder : folder)}>
+      <li
+        className="hover:bg-slate-700 text-slate-300 px-4"
+        onClick={toggle}
+        key={"__folder" + (path ? path + "/" + folder : folder)}
+      >
         <span className="flex border-l border-slate-500 pl-2 py-1">
           <Image
-            src="/fileicons/default_folder.svg"
+            src={`/fileicons/default_folder${isExpanded ? "_opened" : ""}.svg`}
             width={20}
             height={20}
             className="my-auto mr-2"
@@ -181,6 +227,6 @@ function Folder({ folder, path }) {
           key={path ? path + "/" + folder : folder}
         />
       )}
-    </>
+    </div>
   );
 }

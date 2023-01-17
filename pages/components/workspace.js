@@ -1,8 +1,11 @@
 import { useEffect, Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 export default function Workspace({}) {
+  let router = useRouter();
   let [isOpen, setIsOpen] = useState(false);
+  let [isNewProjectOpen, setNewProjectOpen] = useState(false);
   let [projects, setProjects] = useState([]);
   useEffect(() => {
     (async () => {
@@ -28,7 +31,7 @@ export default function Workspace({}) {
             data = await f.json();
             setProjects(data.projects);
             //add event listener to connect button
-            $("#cbtn").parentElement.addEventListener("click", () => {
+            let even = () => {
               //if connected, ask for confirmation to disconnect
               let c;
               if ($("#cbtn").innerText == "Connected!") {
@@ -51,8 +54,15 @@ export default function Workspace({}) {
                 localStorage.removeItem("port");
                 setProjects([]);
               }
-            });
+            };
+            $("#cbtn").parentElement.addEventListener("click", even);
+            return () => {
+              $("#cbtn").parentElement.removeEventListener("click", even);
+            };
           }
+        } else {
+          let $ = document.querySelector.bind(document);
+          $("#cbtn").innerText = "Connect Termux";
         }
       } catch (e) {}
     })();
@@ -62,7 +72,6 @@ export default function Workspace({}) {
   ]);
 
   function closeModal() {
-    let $ = document.querySelector.bind(document);
     setIsOpen(false);
   }
 
@@ -72,6 +81,44 @@ export default function Workspace({}) {
       setIsOpen(true);
     }
   }
+  function closeProjectModal() {
+    setNewProjectOpen(false);
+  }
+  function openProjectModal() {
+    setNewProjectOpen(true);
+  }
+  function createProject() {
+    let $ = document.querySelector.bind(document);
+    let inputEl = $("input[placeholder='PROJECT']");
+    fetch(
+      `http://${localStorage.getItem("host")}:${localStorage.getItem(
+        "port"
+      )}/projects/new`,
+      {
+        method: "POST",
+        headers: {
+          type: "application/json",
+        },
+        body: JSON.stringify({
+          name: inputEl.value,
+        }),
+      }
+    )
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.error) {
+          window.Toast(
+            "Error",
+            "error",
+            "Failed to create project: " + res.error
+          );
+        } else {
+          localStorage.setItem("project", inputEl.value);
+          router.push("/files");
+        }
+      });
+  }
+
   async function connectServer() {
     let $ = document.querySelector.bind(document);
     try {
@@ -87,11 +134,13 @@ export default function Workspace({}) {
         $("#cbtn").parentElement.classList.add("bg-green-500");
         $("#cbtn").parentElement.classList.remove("bg-indigo-600");
         $("button#connector").disabled = true;
-        $("button#connector").innerText = "Connected!";
-        $("button#connector").classList.add("bg-green-500");
+        $("button#connector").innerText = "Connecting...";
+        $("button#connector").classList.add("bg-yellow-700");
         $("button#connector").classList.remove("bg-indigo-600");
         f = await fetch(
-          `http://${$("#host").value}:${$("#port").value}/projects`
+          `http://${$("input[placeholder='HOST']").value}:${
+            $("input[placeholder='PORT']").value
+          }/projects`
         );
         f = await f.json();
         setProjects(f.projects);
@@ -139,7 +188,10 @@ export default function Workspace({}) {
             />
           </div>
           <div className="ml-auto mt-4 grid lg:grid-cols-2 gap-4">
-            <button className="flex bg-indigo-600 py-2 px-4 items-center rounded-md text-white font-bold">
+            <button
+              className="flex bg-indigo-600 py-2 px-4 items-center rounded-md text-white font-bold"
+              onClick={openProjectModal}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -186,7 +238,10 @@ export default function Workspace({}) {
               {projects.length > 0 ? (
                 projects.map((project, index) => {
                   return (
-                    <div className="flex bg-slate-900 px-2 py-4 rounded-md border-2 border-slate-700">
+                    <div
+                      className="flex bg-slate-900 px-2 py-4 rounded-md border-2 border-slate-700"
+                      key={project}
+                    >
                       <Link
                         className="ml-4 text-md text-white font-semibold"
                         href="/files"
@@ -323,8 +378,75 @@ export default function Workspace({}) {
                     </button>
                     <button
                       type="button"
-                      className="text-white inline-flex ml-4 text-lg justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-indigo-200 hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      className="text-white inline-flex ml-4 text-lg justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       onClick={closeModal}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+      <Transition appear show={isNewProjectOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={closeProjectModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-slate-900 p-6 text-left align-middle shadow-xl transition-all border-2 border-slate-800">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-slate-200"
+                  >
+                    Create A New Project
+                  </Dialog.Title>
+                  <div className="mt-2">
+                    <p className="text-sm text-slate-300">
+                      Please provide a name for your new project. Consider not
+                      using spaces in between for ease of access, and if
+                      possible, in lower-case too!
+                    </p>
+                    <input
+                      placeholder="PROJECT"
+                      className="mt-4 bg-gray-900 rounded-md focus:outline-none border-2 border-slate-700 focus:border-indigo-700 text-slate-300 py-2 px-4"
+                      defaultValue="hello-world"
+                    ></input>
+                  </div>
+
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      className="text-white inline-flex text-lg justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      onClick={createProject}
+                    >
+                      Create!
+                    </button>
+                    <button
+                      type="button"
+                      className="text-white inline-flex ml-4 text-lg justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      onClick={closeProjectModal}
                     >
                       Cancel
                     </button>
