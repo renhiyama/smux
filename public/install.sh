@@ -19,7 +19,7 @@ fi
 if [ -d "~/.smux" ]; then
 	echo "[*] Smux Installation exists already."
 else
-	echo "[*] Installing Smux..."6
+	echo "[*] Installing Smux..."
 	# clone the repo
 	git clone https://github.com/renhiyama/smux.git ~/.smux
 fi

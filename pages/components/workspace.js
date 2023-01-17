@@ -332,9 +332,34 @@ export default function Workspace({}) {
                       <p className="text-sm text-white">
                         <span className="text-blue-500">
                           curl -sL https://smux.rovelstars.com/install.sh | bash
+                          && smux-server
                         </span>
                       </p>
-                      <button className="ml-auto rounded-md hover:bg-gray-800 p-1">
+                      <button
+                        className="ml-auto rounded-md hover:bg-gray-800 p-1"
+                        onClick={() => {
+                          if (
+                            navigator &&
+                            navigator.clipboard &&
+                            navigator.clipboard.writeText
+                          ) {
+                            navigator.clipboard.writeText(
+                              "curl -sL https://smux.rovelstars.com/install.sh | bash && smux-server"
+                            );
+                            window.Toast(
+                              "Copied Successfully!",
+                              "success",
+                              "Now paste it in Termux or in any other linux terminal"
+                            );
+                          } else {
+                            window.Toast(
+                              "Failed to copy",
+                              "error",
+                              "Please copy and paste it manually in your terminal."
+                            );
+                          }
+                        }}
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
