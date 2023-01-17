@@ -165,7 +165,9 @@ export default function Workspace({}) {
   return (
     <>
       <div className="px-4 py-4">
-        <h3 className="text-sm font-semibold uppercase">Workspace</h3>
+        <h3 className="text-sm font-semibold uppercase select-none">
+          Workspace
+        </h3>
         <div className="lg:flex">
           <div className="mt-4 flex bg-slate-900 w-full lg:w-96 items-center overflow-hidden p-2 rounded-md border-2 border-slate-700 focus-within:border-blue-500/70">
             <svg

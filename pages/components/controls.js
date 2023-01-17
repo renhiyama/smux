@@ -63,9 +63,11 @@ export default function Controls() {
               />
             </svg>
           </span>
-          <span className="text-sm">{project || "No Active Project"}</span>
+          <span className="text-sm select-none">
+            {project || "No Active Project"}
+          </span>
         </a>
-        <ul className={`${isExpanded ? "" : "hidden"}`}>
+        <ul className={`${isExpanded ? "" : "hidden"} select-none`}>
           <Directory key={"__never_gonna_give_you_up__"} />
         </ul>
       </div>
@@ -157,7 +159,7 @@ function Directory({ path }) {
         localStorage.getItem("project")
       )}/file/${encodeURIComponent(path)}`
     ).then((res) => res.json());
-    window.editor.setValue(f.content);
+    window.editor.session.setValue(f.content);
     window.editor.gotoLine(1);
     localStorage.setItem("currentFile", path);
   }

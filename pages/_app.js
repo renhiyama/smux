@@ -9,9 +9,12 @@ function MyApp({ Component, pageProps }) {
     let e = (event) => {
       if (
         Math.min(window.innerWidth, window.innerHeight) < 800 &&
-        document.fullscreenElement == null
+        document.fullscreenElement == null &&
+        !localStorage.getItem("disableFullScreen")
       ) {
-        document.documentElement.requestFullscreen();
+        try {
+          document.documentElement.requestFullscreen();
+        } catch (e) {}
       }
     };
     window.addEventListener("touchend", e);
