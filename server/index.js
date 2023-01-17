@@ -1,305 +1,304 @@
-import WebSocket, { WebSocketServer } from "ws";
+import { serve } from "@honojs/node-server"; // Write above `Hono`
+import { Hono } from "hono";
+import { cors } from "hono/cors";
 import fs from "fs";
-import os from "os";
 import path from "path";
+import os from "os";
 import child_process from "child_process";
-const homedir = os.homedir();
+let homedir = os.homedir();
 
-// Create a WebSocket server
-const wss = new WebSocketServer({ port: 8080 });
-// Listen for new connections
-wss.on("connection", (ws) => {
-  ws._send = ws.send;
-  ws.send = (m) => {
-    ws._send(m);
-    console.log("Sent: ", JSON.parse(m));
-  };
-  ws.send(
-    JSON.stringify({ type: "connected", message: "Connected to the server" })
-  );
-  ws.on("message", (message) => {
-    //parse json msg
-    let msg;
-    try {
-      msg = JSON.parse(message);
-    } catch (e) {
-      ws.send(JSON.stringify({ error: "Invalid JSON" }));
-      return;
-    }
-    console.log(msg);
-    switch (msg.type) {
-      case "projects":
-        {
-          //create folder if not exist
-          if (!fs.existsSync(`${homedir}/smux/projects`)) {
-            console.log("[*] Creating projects folder");
-            //recursive create
-            fs.mkdirSync(`${homedir}/smux/projects`, { recursive: true });
-          }
-          //send projects
-          ws.send(
-            JSON.stringify({
-              type: "projects",
-              projects: fs.readdirSync(`${homedir}/smux/projects`),
-            })
-          );
-        }
-        break;
-      case "open_project":
-        {
-          //send file directory structure
-          let files = [];
-          let dirs = [];
-          let dir = `${homedir}/smux/projects/${msg.project}`;
-          let dir_files = fs.readdirSync(dir);
-          for (let i = 0; i < dir_files.length; i++) {
-            let file = dir_files[i];
-            let file_path = path.join(dir, file);
-            let stat = fs.statSync(file_path);
-            if (stat.isDirectory()) {
-              dirs.push(file);
-            } else {
-              files.push(file);
-            }
-          }
-          //remove .git folder
-          dirs = dirs.filter((dir) => dir !== ".git");
-          ws.send(
-            JSON.stringify({
-              type: "open_project",
-              files,
-              dirs,
-            })
-          );
-        }
-        break;
-      case "create_project":
-        {
-          //create project folder
-          fs.mkdirSync(`${homedir}/smux/projects/${msg.project}`);
-          //send projects
-          ws.send(
-            JSON.stringify({
-              type: "create_project",
-              status: "success",
-            })
-          );
-        }
-        break;
-      case "delete_project":
-        {
-          //delete project folder
-          console.log(`[*] Deleting project ${msg.project}`);
-          fs.rmSync(`${homedir}/smux/projects/${msg.project}`, {
-            recursive: true,
-            force: true,
-          });
-          ws.send(
-            JSON.stringify({
-              type: "delete_project",
-              status: "success",
-            })
-          );
-        }
-        break;
-      case "create_file":
-        {
-          //create file
-          //check if folder exists
-          if (
-            !fs.existsSync(
-              `${homedir}/smux/projects/${msg.project}/${msg.file
-                .split("/")
-                .slice(0, -1)
-                .join("/")}`
-            )
-          ) {
-            //create folder
-            fs.mkdirSync(
-              `${homedir}/smux/projects/${msg.project}/${msg.file
-                .split("/")
-                .slice(0, -1)
-                .join("/")}`,
-              { recursive: true }
-            );
-          }
-          fs.writeFileSync(
-            `${homedir}/smux/projects/${msg.project}/${msg.file}`,
-            ""
-          );
-          ws.send(
-            JSON.stringify({
-              type: "create_file",
-              status: "success",
-            })
-          );
-        }
-        break;
-      case "delete_file":
-        {
-          //delete file
-          fs.unlinkSync(`${homedir}/smux/projects/${msg.project}/${msg.file}`);
-          ws.send(
-            JSON.stringify({
-              type: "delete_file",
-              status: "success",
-            })
-          );
-        }
-        break;
-      case "create_folder":
-        {
-          //create folder
-          fs.mkdirSync(
-            `${homedir}/smux/projects/${msg.project}/${msg.folder}`,
-            {
-              recursive: true,
-            }
-          );
-          ws.send(
-            JSON.stringify({
-              type: "create_folder",
-              status: "success",
-            })
-          );
-        }
-        break;
-      case "delete_folder":
-        {
-          //delete folder
-          fs.rmdirSync(`${homedir}/smux/projects/${msg.project}/${msg.folder}`);
-          ws.send(
-            JSON.stringify({
-              type: "delete_folder",
-              status: "success",
-            })
-          );
-        }
-        break;
-      case "read_file":
-        {
-          //if file is more than 512kb, send error
-          if (
-            fs.statSync(`${homedir}/smux/projects/${msg.project}/${msg.file}`)
-              .size > 524288
-          ) {
-            ws.send(
-              JSON.stringify({
-                type: "read_file",
-                status: "error",
-                error: "File is too large",
-              })
-            );
-            return;
-          }
-          //read file
-          ws.send(
-            JSON.stringify({
-              type: "read_file",
-              status: "success",
-              content: fs.readFileSync(
-                `${homedir}/smux/projects/${msg.project}/${msg.file}`,
-                "utf8"
-              ),
-            })
-          );
-        }
-        break;
-      case "write_file":
-        {
-          //write file
-          fs.writeFileSync(
-            `${homedir}/smux/projects/${msg.project}/${msg.file}`,
-            msg.content
-          );
-          ws.send(
-            JSON.stringify({
-              type: "write_file",
-              status: "success",
-            })
-          );
-        }
-        break;
-      case "list_files":
-        {
-          //list files and folders of project
-          let files = [];
-          let dirs = [];
-          let dir = `${homedir}/smux/projects/${msg.project}/${msg.path}`;
-          let dir_files = fs.readdirSync(dir);
-          for (let i = 0; i < dir_files.length; i++) {
-            let file = dir_files[i];
-            let file_path = path.join(dir, file);
-            let stat = fs.statSync(file_path);
-            if (stat.isDirectory()) {
-              dirs.push(file);
-            } else {
-              files.push(file);
-            }
-          }
-          //exclude .git folder
-          dirs = dirs.filter((dir) => dir !== ".git");
-          ws.send(
-            JSON.stringify({
-              type: "list_files",
-              files,
-              dirs,
-              path: msg.path,
-            })
-          );
-        }
-        break;
-      case "clone":
-        {
-          //clone project by spawning git process
-          let git = child_process.spawn("git", [
-            "clone",
-            msg.url,
-            `${homedir}/smux/projects/${
-              msg.project || msg.url.split("/").slice(-1)[0].replace(".git", "")
-            }`,
-          ]);
-          git.stdout.on("data", (data) => {
-            ws.send(
-              JSON.stringify({
-                type: "clone",
-                status: "stdout",
-                data: data.toString(),
-              })
-            );
-            console.log(`[*] ${data.toString()}`);
-          });
-          git.stderr.on("data", (data) => {
-            ws.send(
-              JSON.stringify({
-                type: "clone",
-                status: "stderr",
-                data: data.toString(),
-              })
-            );
-            console.log(`[*] ${data.toString()}`);
-          });
-          git.on("close", (code) => {
-            ws.send(
-              JSON.stringify({
-                type: "clone",
-                status: "close",
-                code: code,
-              })
-            );
-            console.log(
-              `[*] Cloned project ${
-                msg.project ||
-                msg.url.split("/").slice(-1)[0].replace(".git", "")
-              }`
-            );
-          });
-        }
-        break;
-      default:
-        ws.send(JSON.stringify({ error: "Invalid message type" }));
-        break;
+const app = new Hono();
+app.use("*", cors());
+app.use("*", async (c, next) => {
+  await next();
+  c.header("Access-Control-Allow-Private-Network", "true");
+});
+app.get("/", (c) => {
+  return c.json({ message: "ONLINE" });
+});
+
+app.get("/projects", (c) => {
+  // Get all projects from ~/smux/projects
+  let projects = fs.readdirSync(path.join(homedir, "smux/projects"));
+  return c.json({ projects });
+});
+
+app.get("/projects/:project", (c) => {
+  // get all files and folders from ~/smux/projects/:project
+  let project = c.req.param("project");
+  project = decodeURIComponent(project);
+  let all = fs.readdirSync(path.join(homedir, "smux/projects", project));
+  let files = [];
+  let folders = [];
+  all.forEach((item) => {
+    if (
+      fs
+        .lstatSync(path.join(homedir, "smux/projects", project, item))
+        .isDirectory()
+    ) {
+      folders.push(item);
+    } else {
+      files.push(item);
     }
   });
+  folders = folders.filter((item) => item !== ".git");
+  return c.json({ files, folders });
 });
-console.log("[*] WebSocket server started on port 8080");
+
+// create new project
+app.post("/projects/new", async (c) => {
+  let body;
+  try {
+    body = await c.req.json();
+  } catch (e) {
+    return c.json({ error: "Invalid JSON" });
+  }
+  if (!body.name) {
+    return c.json({ error: "Missing name" });
+  }
+  let name = body.name;
+  let projectPath = path.join(homedir, "smux/projects", name);
+  if (fs.existsSync(projectPath)) {
+    return c.json({ error: "Project already exists" });
+  }
+  fs.mkdirSync(projectPath);
+  return c.json({ message: "Project created", name });
+});
+
+// delete project
+app.delete("/projects/:project", async (c) => {
+  let project = c.req.param("project");
+  project = decodeURIComponent(project);
+  let projectPath = path.join(homedir, "smux/projects", project);
+  if (!fs.existsSync(projectPath)) {
+    return c.json({ error: "Project does not exist" });
+  }
+  fs.rmdirSync(projectPath, { recursive: true, force: true });
+  return c.json({ message: "Project deleted", name: project });
+});
+
+// create new file
+app.post("/projects/:project/new/file", async (c) => {
+  let body;
+  try {
+    body = await c.req.json();
+  } catch (e) {
+    return c.json({ error: "Invalid JSON" });
+  }
+  if (!body.file) {
+    return c.json({ error: "Missing file" });
+  }
+  if (!body.content) {
+    return c.json({ error: "Missing content" });
+  }
+  let project = c.req.param("project");
+  project = decodeURIComponent(project);
+  let file = body.file;
+  let content = body.content;
+  let projectPath = path.join(homedir, "smux/projects", project);
+  if (!fs.existsSync(projectPath)) {
+    return c.json({ error: "Project does not exist" });
+  }
+  let filePath = path.join(projectPath, file);
+  if (fs.existsSync(filePath)) {
+    return c.json({ error: "File already exists" });
+  }
+  //get the folder of the file, and check if it exists, if not, recursively create it
+  let folder = path.dirname(`${homedir}/smux/projects/${project}/${file}`);
+  if (!fs.existsSync(folder)) {
+    fs.mkdirSync(folder, { recursive: true });
+  }
+  fs.writeFileSync(filePath, content);
+  return c.json({ message: "File created", file });
+});
+
+// create new folder
+app.post("/projects/:project/new/folder", async (c) => {
+  let body;
+  try {
+    body = await c.req.json();
+  } catch (e) {
+    return c.json({ error: "Invalid JSON" });
+  }
+  if (!body.folder) {
+    return c.json({ error: "Missing folder" });
+  }
+  let project = c.req.param("project");
+  project = decodeURIComponent(project);
+  let folder = body.folder;
+  let projectPath = path.join(homedir, "smux/projects", project);
+  if (!fs.existsSync(projectPath)) {
+    return c.json({ error: "Project does not exist" });
+  }
+  let folderPath = path.join(projectPath, folder);
+  if (fs.existsSync(folderPath)) {
+    return c.json({ error: "Folder already exists" });
+  }
+  fs.mkdirSync(folderPath);
+  return c.json({ message: "Folder created", folder });
+});
+
+// delete file
+app.delete("/projects/:project/file/:file", async (c) => {
+  let project = c.req.param("project");
+  project = decodeURIComponent(project);
+  let file = c.req.param("file");
+  //urldecode file
+  file = decodeURIComponent(file);
+  let projectPath = path.join(homedir, "smux/projects", project);
+  if (!fs.existsSync(projectPath)) {
+    return c.json({ error: "Project does not exist" });
+  }
+  let filePath = path.join(projectPath, file);
+  if (!fs.existsSync(filePath)) {
+    return c.json({ error: "File does not exist" });
+  }
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      return c.json({ error: "Failed to delete file" });
+    }
+    return c.json({ message: "File deleted", file });
+  });
+});
+
+// delete folder
+app.delete("/projects/:project/folder/:folder", async (c) => {
+  let project = c.req.param("project");
+  project = decodeURIComponent(project);
+  let folder = c.req.param("folder");
+  //urldecode folder
+  folder = decodeURIComponent(folder);
+  let projectPath = path.join(homedir, "smux/projects", project);
+  if (!fs.existsSync(projectPath)) {
+    return c.json({ error: "Project does not exist" });
+  }
+  let folderPath = path.join(projectPath, folder);
+  if (!fs.existsSync(folderPath)) {
+    return c.json({ error: "Folder does not exist" });
+  }
+  fs.rmdir(folder, { recursive: true, force: true }, (err) => {
+    if (err) {
+      return c.json({ error: "Failed to delete folder" });
+    }
+    return c.json({ message: "Folder deleted", folder });
+  });
+});
+
+// read file
+app.get("/projects/:project/file/:file", async (c) => {
+  let project = c.req.param("project");
+  project = decodeURIComponent(project);
+  let file = c.req.param("file");
+  //urldecode file
+  file = decodeURIComponent(file);
+  let projectPath = path.join(homedir, "smux/projects", project);
+  if (!fs.existsSync(projectPath)) {
+    return c.json({ error: "Project does not exist" });
+  }
+  let filePath = path.join(projectPath, file);
+  if (!fs.existsSync(filePath)) {
+    return c.json({ error: "File does not exist" });
+  }
+  let content = fs.readFileSync(filePath, "utf8");
+  return c.json({ message: "File read", file, content });
+});
+
+//read folder contents
+app.get("/projects/:project/folder/:folder", async (c) => {
+  let project = c.req.param("project");
+  project = decodeURIComponent(project);
+  let folder = c.req.param("folder");
+  //urldecode folder
+  folder = decodeURIComponent(folder);
+  let projectPath = path.join(homedir, "smux/projects", project);
+  if (!fs.existsSync(projectPath)) {
+    return c.json({ error: "Project does not exist" });
+  }
+  let folderPath = path.join(projectPath, folder);
+  if (!fs.existsSync(folderPath)) {
+    return c.json({ error: "Folder does not exist" });
+  }
+  let all = fs.readdirSync(folderPath);
+  let files = [];
+  let folders = [];
+  for (let i = 0; i < all.length; i++) {
+    let item = all[i];
+    let itemPath = path.join(folderPath, item);
+    let stats = fs.statSync(itemPath);
+    if (stats.isDirectory()) {
+      folders.push(item);
+    } else {
+      files.push(item);
+    }
+  }
+  return c.json({ message: "Folder read", folder, files, folders });
+});
+
+// write file
+app.post("/projects/:project/file/:file", async (c) => {
+  let body;
+  try {
+    body = await c.req.json();
+  } catch (e) {
+    return c.json({ error: "Invalid JSON" });
+  }
+  if (!body.content) {
+    return c.json({ error: "Missing content" });
+  }
+  let project = c.req.param("project");
+  project = decodeURIComponent(project);
+  let file = c.req.param("file");
+  //urldecode file
+  file = decodeURIComponent(file);
+  let content = body.content;
+  let projectPath = path.join(homedir, "smux/projects", project);
+  if (!fs.existsSync(projectPath)) {
+    return c.json({ error: "Project does not exist" });
+  }
+  let filePath = path.join(projectPath, file);
+  if (!fs.existsSync(filePath)) {
+    return c.json({ error: "File does not exist" });
+  }
+  fs.writeFileSync(filePath, content);
+  return c.json({ message: "File written", file });
+});
+
+// rename file
+app.put("/projects/:project/file/:file", async (c) => {
+  let body;
+  try {
+    body = await c.req.json();
+  } catch (e) {
+    return c.json({ error: "Invalid JSON" });
+  }
+  if (!body.newName) {
+    return c.json({ error: "Missing newName" });
+  }
+  let project = c.req.param("project");
+  project = decodeURIComponent(project);
+  let file = c.req.param("file");
+  //urldecode file
+  file = decodeURIComponent(file);
+  let newName = body.newName;
+  let projectPath = path.join(homedir, "smux/projects", project);
+  if (!fs.existsSync(projectPath)) {
+    return c.json({ error: "Project does not exist" });
+  }
+  let filePath = path.join(projectPath, file);
+  if (!fs.existsSync(filePath)) {
+    return c.json({ error: "File does not exist" });
+  }
+  let newFilePath = path.join(projectPath, newName);
+  fs.rename(filePath, newFilePath, (err) => {
+    if (err) {
+      return c.json({ error: "Failed to rename file" });
+    }
+    return c.json({ message: "File renamed", file, newName });
+  });
+});
+
+serve({
+  fetch: app.fetch.bind(app),
+  port: process.env.PORT || 8080,
+});
+console.log("[*] Server started on port", process.env.PORT || 8080);
