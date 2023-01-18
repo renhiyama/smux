@@ -1,9 +1,14 @@
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-
+import { detectLang } from "../utils/detectLang";
+import Image from "next/image";
 export default function EditorArea({}) {
   const router = useRouter();
   const [loaded, setLoaded] = useState(false);
+  const [currentFile, setCurrentFile] = useState("");
+  useEffect(() => {
+    setCurrentFile(globalThis?.localStorage?.getItem("currentFile"));
+  }, [globalThis?.localStorage?.getItem("currentFile")]);
   useEffect(() => {
     let script = document.createElement("script");
     script.src =
@@ -23,7 +28,11 @@ export default function EditorArea({}) {
       router.push("/workspace");
       return;
     });
-    let editor = ace.edit("editor");
+    let editor = ace.edit("editor", {
+      cursorStyle: "smooth",
+      showInvisibles: true,
+      autoScrollEditorIntoView: true,
+    });
     window.editor = editor;
     ace.config.set(
       "basePath",
@@ -31,9 +40,18 @@ export default function EditorArea({}) {
     );
     editor.setShowPrintMargin(false);
     editor.setTheme("ace/theme/one_dark");
-    editor.session.setMode("ace/mode/javascript");
+    if (detectLang(localStorage.getItem("currentFile"))) {
+      editor.session.setMode(
+        `ace/mode/${
+          detectLang(currentFile) == "js"
+            ? "javascript"
+            : detectLang(currentFile)
+        }`
+      );
+    }
     editor.session.setUseWrapMode(true);
     editor.session.setUseSoftTabs(true);
+    editor.setReadOnly(true);
     if (localStorage.getItem("currentFile")) {
       fetch(
         `http://${localStorage.getItem("host")}:${localStorage.getItem(
@@ -44,15 +62,26 @@ export default function EditorArea({}) {
       )
         .then((res) => res.json())
         .then((res) => {
+          //check if content is over 512kb
+          if (res.content.length > 524288) {
+            //show error
+            window.Toast(
+              "File is too large to open",
+              "error",
+              "We can't open files larger than 512kb. Consider splitting your codes!"
+            );
+            localStorage.removeItem("currentFile");
+            return router.push("/workspace");
+          }
           editor.session.setValue(res.content);
           editor.gotoLine(1);
           editor.setAnimatedScroll(true);
           editor.resize();
+          editor.setReadOnly(false);
         });
     }
     document.getElementById("editor").classList.remove("hidden");
     let inter;
-    let resize;
     if (
       localStorage.getItem("currentFile") &&
       localStorage.getItem("project")
@@ -79,13 +108,8 @@ export default function EditorArea({}) {
         }
       }, 5000);
     }
-    resize = setInterval(() => {
-      editor.resize();
-    }, 100);
     return () => {
       editor.destroy();
-      clearInterval(inter);
-      clearInterval(resize);
     };
   }, [loaded]);
   //toggleControls with react
@@ -128,13 +152,21 @@ export default function EditorArea({}) {
       }
     };
     window.addEventListener("resize", resizeListen);
+    let resize = () => {
+      try {
+        if (controlsOpen) {
+          editor.resize();
+        }
+      } catch (e) {}
+    };
+    setInterval(resize, 500);
     return () => {
       window.removeEventListener("resize", resizeListen);
+      clearInterval(resize);
     };
   }, [controlsOpen]);
   let toggleControls = function () {
     setControlsToggle(!controlsOpen);
-    if (controlsOpen) window?.editor?.resize();
   };
   let toggleControlsIfDark = function (e) {
     //stop propagation if el has brightness-50 class
@@ -195,11 +227,20 @@ export default function EditorArea({}) {
               </svg>
             </button>
           </div>
+          <span className="flex my-auto mx-2">
+            <Image
+              src={`/fileicons/file_type_${detectLang(currentFile)}.svg`}
+              width={20}
+              height={20}
+            />
+          </span>
         </div>
         <div id="editor" className="mx-auto h-full w-full hidden"></div>
         <div
           id="Econtrols"
-          className="flex mt-auto mx-auto py-2 lg:py-4 px-1 border-t border-slate-700 bg-black w-full"
+          className={`${
+            controlsOpen ? "" : "hidden"
+          } flex mt-auto mx-auto py-2 lg:py-4 px-1 border-t border-slate-700 bg-black w-full`}
         >
           <button
             name="tab"
@@ -341,6 +382,9 @@ export default function EditorArea({}) {
             className="px-2 py-1"
             onClick={() => {
               editor.blur();
+              setTimeout(() => {
+                editor.resize();
+              }, 500);
             }}
           >
             <svg

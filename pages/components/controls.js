@@ -2,6 +2,8 @@ import ControlButton from "./controls/button";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { detectLang } from "../utils/detectLang";
+import { specialFolders } from "../utils/specialFolders";
 export default function Controls() {
   const Router = useRouter();
   const [project, setProject] = useState("Loading...");
@@ -159,9 +161,23 @@ function Directory({ path }) {
         localStorage.getItem("project")
       )}/file/${encodeURIComponent(path)}`
     ).then((res) => res.json());
+    //if content is more than 512kb, don't open it
+    if (f.content.length > 512000) {
+      window.Toast(
+        "File too large",
+        "danger",
+        "We can't open files larger than 512kb. Consider splitting your codes!"
+      );
+      return;
+    }
     window.editor.session.setValue(f.content);
     window.editor.gotoLine(1);
     localStorage.setItem("currentFile", path);
+    editor.session.setMode(
+      "ace/mode/" +
+        (detectLang(path) === "js" ? "javascript" : detectLang(path))
+    );
+    editor.setReadOnly(false);
   }
   return (
     <ul className="ml-2" key={"_path__" + path}>
@@ -185,7 +201,11 @@ function Directory({ path }) {
           >
             <span className="flex border-l border-slate-500 pl-2 py-1">
               <Image
-                src="/fileicons/default_file.svg"
+                src={`/fileicons/${
+                  detectLang(file)
+                    ? "file_type_" + detectLang(file)
+                    : "default_file"
+                }.svg`}
                 width={20}
                 height={20}
                 className="my-auto mr-2"
@@ -214,7 +234,11 @@ function Folder({ folder, path }) {
       >
         <span className="flex border-l border-slate-500 pl-2 py-1">
           <Image
-            src={`/fileicons/default_folder${isExpanded ? "_opened" : ""}.svg`}
+            src={`/fileicons/${
+              specialFolders(folder)
+                ? "folder_type_" + specialFolders(folder)
+                : "default_folder"
+            }${isExpanded ? "_opened" : ""}.svg`}
             width={20}
             height={20}
             className="my-auto mr-2"

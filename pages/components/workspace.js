@@ -16,7 +16,7 @@ export default function Workspace({}) {
             `http://${localStorage.getItem("host")}:${localStorage.getItem(
               "port"
             )}`
-          );
+          ).catch(() => {});
           let data = await f.json();
           if (data.message === "ONLINE") {
             let $ = document.querySelector.bind(document);
