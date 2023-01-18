@@ -1,3 +1,7 @@
+export default function () {
+  return <></>;
+}
+
 export function detectLang(filename) {
   let lang = "text";
   if (filename.endsWith(".js")) {

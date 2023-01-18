@@ -1,3 +1,7 @@
+export default function () {
+  return <></>;
+}
+
 export function specialFolders(foldername) {
   let folder = null;
   switch (foldername) {
