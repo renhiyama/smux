@@ -160,6 +160,7 @@ export default function Workspace({}) {
 
   function selectProject(project) {
     localStorage.setItem("project", project);
+    router.push("/files");
   }
   return (
     <>
@@ -235,22 +236,16 @@ export default function Workspace({}) {
           <div className="mt-4">
             {/* list projects */}
             <h3 className="text-sm font-semibold uppercase">Projects</h3>
-            <div className="mt-4 grid lg:grid-cols-2 gap-4">
+            <div className="mt-4 grid lg:grid-cols-2 lg:max-w-md gap-4">
               {projects.length > 0 ? (
                 projects.map((project, index) => {
                   return (
-                    <div
-                      className="flex bg-slate-900 px-2 py-4 rounded-md border-2 border-slate-700"
-                      key={project}
-                    >
-                      <Link
-                        className="ml-4 text-md text-white font-semibold"
-                        href="/files"
-                        onClick={() => selectProject(project)}
-                      >
-                        {project}
-                      </Link>
-                    </div>
+                    <ProjectCard
+                      project={project}
+                      onClick={() => {
+                        selectProject(project);
+                      }}
+                    />
                   );
                 })
               ) : (
@@ -484,5 +479,18 @@ export default function Workspace({}) {
         </Dialog>
       </Transition>
     </>
+  );
+}
+
+function ProjectCard({ project, onClick }) {
+  return (
+    <div
+      className="px-6 py-4 rounded-md bg-slate-900 border-2 border-slate-700"
+      onClick={onClick}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-md font-black text-blue-500">{project}</span>
+      </div>
+    </div>
   );
 }

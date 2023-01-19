@@ -17,9 +17,9 @@ function MyApp({ Component, pageProps }) {
         } catch (e) {}
       }
     };
-    window.addEventListener("touchend", e);
+    document.documentElement.addEventListener("click", e);
     return () => {
-      window.removeEventListener("touchend", e);
+      document.documentElement.removeEventListener("click", e);
     };
   }, []);
   return (

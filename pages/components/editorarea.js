@@ -62,6 +62,9 @@ export default function EditorArea({}) {
       )
         .then((res) => res.json())
         .then((res) => {
+          if (res.error) {
+            return;
+          }
           //check if content is over 512kb
           if (res.content.length > 524288) {
             //show error
@@ -232,6 +235,7 @@ export default function EditorArea({}) {
               src={`/fileicons/file_type_${detectLang(currentFile)}.svg`}
               width={20}
               height={20}
+              alt="file icon"
             />
           </span>
         </div>

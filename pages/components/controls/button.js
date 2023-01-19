@@ -83,7 +83,7 @@ let icons = {
     </svg>
   ),
 };
-export default function Button({ name }) {
+export default function Button({ name, onClick }) {
   let [isOpen, setIsOpen] = useState(false);
   //show a tooltip when hovering over the button, use absolute positioning to show it
   let [showTooltip, setShowTooltip] = useState(false);
@@ -125,6 +125,7 @@ export default function Button({ name }) {
     if (name == "refresh") {
       refreshEvent();
     }
+    if (onClick) onClick();
     hide();
   };
   function closeModal() {

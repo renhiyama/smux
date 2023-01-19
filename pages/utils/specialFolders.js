@@ -27,7 +27,10 @@ export function specialFolders(foldername) {
       folder = "view";
       break;
     case "routes":
-      folder = "routes";
+      folder = "route";
+      break;
+    case "route":
+      folder = "route";
       break;
     case "controllers":
       folder = "controllers";

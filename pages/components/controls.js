@@ -1,9 +1,10 @@
 import ControlButton from "./controls/button";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment, useRef } from "react";
 import { useRouter } from "next/router";
 import { detectLang } from "../utils/detectLang";
 import { specialFolders } from "../utils/specialFolders";
+
 export default function Controls() {
   const Router = useRouter();
   const [project, setProject] = useState("Loading...");
@@ -43,7 +44,7 @@ export default function Controls() {
         <ControlButton name="refresh" />
         <ControlButton name="new-file" />
         <ControlButton name="new-folder" />
-        <ControlButton name="more" />
+        <QuickControls />
       </div>
       <div className="mt-4">
         <a
@@ -69,7 +70,11 @@ export default function Controls() {
             {project || "No Active Project"}
           </span>
         </a>
-        <ul className={`${isExpanded ? "" : "hidden"} select-none`}>
+        <ul
+          className={`${
+            isExpanded ? "" : "hidden"
+          } select-none overflow-auto max-h-screen`}
+        >
           <Directory key={"__never_gonna_give_you_up__"} />
         </ul>
       </div>
@@ -86,11 +91,16 @@ function Directory({ path }) {
       let project = globalThis?.localStorage?.getItem("project");
       if (!project) return;
       if (!path) {
-        let { files, folders } = await fetch(
+        let { files, folders, error } = await fetch(
           `http://${localStorage.getItem("host")}:${localStorage.getItem(
             "port"
           )}/projects/${encodeURIComponent(project)}`
         ).then((res) => res.json());
+        if (error) {
+          window.Toast(error, "danger", `Project \`/${project}\` not found.`);
+          localStorage.removeItem("project");
+          return router.push("/workspace");
+        }
         setFiles(files);
         setFolders(folders);
       } else {
@@ -254,5 +264,128 @@ function Folder({ folder, path }) {
         />
       )}
     </div>
+  );
+}
+
+function QuickControls() {
+  let router = useRouter();
+  //this uses menu dropdown from headlessui react
+  let [isExpanded, setIsExpanded] = useState(false);
+  function toggle() {
+    setIsExpanded(!isExpanded);
+  }
+  //only include code for menu dropdown, dont use headlessui react. create from scratch
+  return (
+    <>
+      <ControlButton onClick={toggle} name="more" />
+      <div
+        className={`${
+          isExpanded ? "" : "hidden"
+        } z-[200] absolute top-12 right-4 bg-slate-900 border-2 border-slate-700 rounded-md shadow-lg p-2`}
+      >
+        <div className="flex flex-col">
+          <button
+            className="text-slate-300 hover:bg-slate-700 px-2 py-1 rounded-md"
+            onClick={() => {
+              if (!window.showOpenFilePicker) {
+                window.Toast(
+                  "Not supported",
+                  "danger",
+                  "This feature is not supported in your browser. Please use Chrome or Edge."
+                );
+                return;
+              }
+              window
+                ?.showOpenFilePicker({ multiple: true })
+                ?.then(async (files) => {
+                  //for loop async
+                  for (let file of files) {
+                    //upload
+                    let project = globalThis?.localStorage?.getItem("project");
+                    let f = await fetch(
+                      `http://${localStorage.getItem(
+                        "host"
+                      )}:${localStorage.getItem(
+                        "port"
+                      )}/projects/${encodeURIComponent(project)}/new/file`,
+                      {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                          content: await file.text(),
+                          file: file.name,
+                        }),
+                      }
+                    ).then((res) => res.json());
+                    if (f.error) {
+                      window.Toast(
+                        f.error,
+                        "danger",
+                        "Failed to upload file: " + file.name
+                      );
+                    } else {
+                      window.Toast(
+                        `File Uploaded [${files.indexOf(file) + 1}/${
+                          files.length
+                        }`,
+                        "success",
+                        file.name
+                      );
+                    }
+                  }
+                });
+            }}
+          >
+            Import File
+          </button>
+          <button
+            className="text-red-600 hover:bg-red-300 px-2 py-1 rounded-md"
+            onClick={() => {
+              let name = prompt(
+                `Enter \`${localStorage.getItem(
+                  "project"
+                )}\` to confirm. This will DELETE your Project! It's cannot be recovered!`
+              );
+              if (name === localStorage.getItem("project")) {
+                fetch(
+                  `http://${localStorage.getItem(
+                    "host"
+                  )}:${localStorage.getItem(
+                    "port"
+                  )}/projects/${encodeURIComponent(
+                    localStorage.getItem("project")
+                  )}`,
+                  {
+                    method: "DELETE",
+                  }
+                )
+                  .then((res) => res.json())
+                  .then((res) => {
+                    if (res.error) {
+                      window.Toast("Error", "danger", res.error);
+                    } else {
+                      window.Toast(
+                        "Project Deleted",
+                        "success",
+                        "Your project has been deleted."
+                      );
+                      setTimeout(() => {
+                        localStorage.removeItem("project");
+                        router.push("/workspace");
+                      }, 1000);
+                    }
+                  });
+              } else {
+                window.Toast("Error", "danger", "Project name did not match.");
+              }
+            }}
+          >
+            Delete Project
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

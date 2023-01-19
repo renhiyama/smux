@@ -27,22 +27,26 @@ app.get("/projects/:project", (c) => {
   // get all files and folders from ~/smux/projects/:project
   let project = c.req.param("project");
   project = decodeURIComponent(project);
-  let all = fs.readdirSync(path.join(homedir, "smux/projects", project));
-  let files = [];
-  let folders = [];
-  all.forEach((item) => {
-    if (
-      fs
-        .lstatSync(path.join(homedir, "smux/projects", project, item))
-        .isDirectory()
-    ) {
-      folders.push(item);
-    } else {
-      files.push(item);
-    }
-  });
-  folders = folders.filter((item) => item !== ".git");
-  return c.json({ files, folders });
+  try {
+    let all = fs.readdirSync(path.join(homedir, "smux/projects", project));
+    let files = [];
+    let folders = [];
+    all.forEach((item) => {
+      if (
+        fs
+          .lstatSync(path.join(homedir, "smux/projects", project, item))
+          .isDirectory()
+      ) {
+        folders.push(item);
+      } else {
+        files.push(item);
+      }
+    });
+    folders = folders.filter((item) => item !== ".git");
+    return c.json({ files, folders });
+  } catch (e) {
+    return c.json({ error: "Project not found" });
+  }
 });
 
 // create new project

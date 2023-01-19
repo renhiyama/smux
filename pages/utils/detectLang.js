@@ -3,6 +3,7 @@ export default function () {
 }
 
 export function detectLang(filename) {
+  if (!filename) return "text";
   let lang = "text";
   if (filename.endsWith(".js")) {
     lang = "js";
