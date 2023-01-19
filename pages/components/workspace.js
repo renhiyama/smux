@@ -152,9 +152,7 @@ export default function Workspace({}) {
       window.Toast(
         "Error connecting to server",
         "danger",
-        `Failed to connect: ${localStorage.getItem(
-          "host"
-        )}:${localStorage.getItem("port")}`
+        `Failed to connect: ${$("#host").value}:${$("#port").value}`
       );
       console.log(e);
     }
