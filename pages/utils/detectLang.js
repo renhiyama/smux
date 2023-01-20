@@ -21,10 +21,10 @@ export function detectLang(filename) {
     lang = "typescript";
   }
   if (filename.endsWith(".tsx")) {
-    lang = "tsx";
+    lang = "typscript";
   }
   if (filename.endsWith(".jsx")) {
-    lang = "jsx";
+    lang = "js";
   }
   if (filename.endsWith(".vue")) {
     lang = "vue";
