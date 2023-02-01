@@ -26,20 +26,5 @@ fi
 cd ~/.smux/server
 echo "[*] Installing Dependencies..."
 npm install
-# check if script exists, if yes delete it
-if [ -f "/usr/local/bin/smux" ]; then
-	echo "[*] Deleting old script..."
-	rm /usr/local/bin/smux
-fi
-# write a bash script to run the server and save it to /usr/local/bin or /bin
-echo '#!/bin/bash
-cd ~/.smux/server
-node index.js' > ~/.smux/smux-server
-chmod +x ~/.smux/smux-server
-# check if sudo is available
-if [ -x "$(command -v sudo)" ]; then
-  sudo mv ~/.smux/smux-server /usr/local/bin/smux-server
-else
-  mv ~/.smux/smux-server /bin/smux-server
-fi
-echo '`smux-server` installed successfully'
+npm link .
+echo '`smux-server` installed successfully. Run `smux-server` to start the server.'
