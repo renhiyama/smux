@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { serve, serveStatic } from "@honojs/node-server"; // Write above `Hono`
 import { Hono } from "hono";
 import { cors } from "hono/cors";
