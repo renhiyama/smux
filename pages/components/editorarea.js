@@ -118,8 +118,8 @@ export default function EditorArea({}) {
   //toggleControls with react
   const [controlsOpen, setControlsToggle] = useState(true);
   useEffect(() => {
-    let mobileScreen = () => {
-      return Math.min(window.screen.width, window.screen.height) < 800;
+    window.mobileScreen = () => {
+      return Math.min(window.screen.width, window.screen.height) < 750;
     };
     let whatisnow = mobileScreen();
     let cp = document.getElementById("controls");
@@ -179,6 +179,11 @@ export default function EditorArea({}) {
       toggleControls();
     }
   };
+  useEffect(() => {
+    if (!window.mobileScreen()) {
+      toggleControls();
+    }
+  }, []);
   return (
     <>
       <div
@@ -383,7 +388,7 @@ export default function EditorArea({}) {
           </button>
           <button
             name="blur"
-            className="px-2 py-1"
+            className="px-2 py-1 lg:hidden"
             onClick={() => {
               editor.blur();
               setTimeout(() => {

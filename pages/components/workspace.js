@@ -233,27 +233,27 @@ export default function Workspace({}) {
               </span>
             </button>
           </div>
-          <div className="mt-4">
-            {/* list projects */}
-            <h3 className="text-sm font-semibold uppercase">Projects</h3>
-            <div className="mt-4 grid lg:grid-cols-2 lg:max-w-md gap-4">
-              {projects.length > 0 ? (
-                projects.map((project, index) => {
-                  return (
-                    <ProjectCard
-                      project={project}
-                      onClick={() => {
-                        selectProject(project);
-                      }}
-                    />
-                  );
-                })
-              ) : (
-                <p className="text-sm font-semibold normalize text-center">
-                  No projects found...
-                </p>
-              )}
-            </div>
+        </div>
+        <div className="mt-4">
+          {/* list projects */}
+          <h3 className="text-sm font-semibold uppercase">Projects</h3>
+          <div className="mt-4 grid lg:grid-cols-2 lg:max-w-md gap-4">
+            {projects.length > 0 ? (
+              projects.map((project, index) => {
+                return (
+                  <ProjectCard
+                    project={project}
+                    onClick={() => {
+                      selectProject(project);
+                    }}
+                  />
+                );
+              })
+            ) : (
+              <p className="text-sm font-semibold normalize text-center">
+                No projects found...
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -485,11 +485,14 @@ export default function Workspace({}) {
 function ProjectCard({ project, onClick }) {
   return (
     <div
-      className="px-6 py-4 rounded-md bg-slate-900 border-2 border-slate-700"
+      className="px-6 py-4 rounded-md bg-slate-900 border-2 border-slate-700 cursor-pointer"
       onClick={onClick}
+      key={project}
     >
       <div className="flex items-center justify-between">
-        <span className="text-md font-black text-blue-500">{project}</span>
+        <span className="text-md font-black text-blue-500 truncate">
+          {project}
+        </span>
       </div>
     </div>
   );

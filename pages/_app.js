@@ -8,11 +8,11 @@ function MyApp({ Component, pageProps }) {
     //listen for user touch
     let e = (event) => {
       if (
-        Math.min(window.innerWidth, window.innerHeight) < 800 &&
-        document.fullscreenElement == null &&
+        Math.min(window.innerWidth, window.innerHeight) < 750 &&
         !localStorage.getItem("disableFullScreen")
       ) {
         try {
+          if (document.fullscreenEnabled) return;
           document.documentElement.requestFullscreen();
         } catch (e) {}
       }

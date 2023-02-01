@@ -209,7 +209,7 @@ export default function Button({ name, onClick }) {
                   leaveFrom="opacity-100 scale-100"
                   leaveTo="opacity-0 scale-95"
                 >
-                  <Dialog.Panel className="min-w-full max-w-md transform overflow-hidden rounded-2xl bg-slate-900 p-6 text-left align-middle shadow-xl transition-all border-2 border-slate-800">
+                  <Dialog.Panel className="max-w-md transform overflow-hidden rounded-2xl bg-slate-900 p-6 text-left align-middle shadow-xl transition-all border-2 border-slate-800">
                     <Dialog.Title
                       as="h3"
                       className="text-lg font-medium leading-6 text-slate-300 capitalize"

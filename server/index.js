@@ -1,13 +1,22 @@
-import { serve } from "@honojs/node-server"; // Write above `Hono`
+import { serve, serveStatic } from "@honojs/node-server"; // Write above `Hono`
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import fs from "fs";
 import path from "path";
 import os from "os";
 import child_process from "child_process";
+import { WebSocketServer } from "ws";
+import { fileURLToPath, URL } from "url";
+
+const serverFilePath = fileURLToPath(import.meta.url);
+const serverDir = path.dirname(serverFilePath);
+
 let homedir = os.homedir();
+let wsPort = parseInt(process.env.WS_PORT || process.env.PORT || 8080) + 1;
+let wsServer = new WebSocketServer({ port: wsPort });
 
 const app = new Hono();
+
 app.use("*", cors());
 app.use("*", async (c, next) => {
   await next();
@@ -15,6 +24,10 @@ app.use("*", async (c, next) => {
 });
 app.get("/", (c) => {
   return c.json({ message: "ONLINE" });
+});
+
+app.get("/ws", (c) => {
+  return c.json({ port: wsPort });
 });
 
 app.get("/projects", (c) => {
@@ -93,7 +106,7 @@ app.post("/projects/:project/new/file", async (c) => {
     return c.json({ error: "Missing file" });
   }
   if (!body.content) {
-    return c.json({ error: "Missing content" });
+    body.content = "";
   }
   let project = c.req.param("project");
   project = decodeURIComponent(project);
@@ -300,6 +313,8 @@ app.put("/projects/:project/file/:file", async (c) => {
     return c.json({ message: "File renamed", file, newName });
   });
 });
+
+app.get("*", serveStatic({ root: serverDir }));
 
 serve({
   fetch: app.fetch.bind(app),
