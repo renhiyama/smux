@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@honojs/node-server': ^0.1.3
+  '@hono/node-server': ^0.2.4
   hono: ^2.7.2
   request-light: ^0.7.0
   vscode-json-languageserver: ^1.3.4
@@ -10,7 +10,7 @@ specifiers:
   ws: ^8.12.0
 
 dependencies:
-  '@honojs/node-server': 0.1.3
+  '@hono/node-server': 0.2.4
   hono: 2.7.2
   request-light: 0.7.0
   vscode-json-languageserver: 1.3.4
@@ -20,8 +20,8 @@ dependencies:
 
 packages:
 
-  /@honojs/node-server/0.1.3:
-    resolution: {integrity: sha512-JbaXLkN+U2cZf90Qt9MbnWhkTtdA00xWZFX4uE/0zyQUY5RXAPbqnTHkuj7XqHElMkkEWYsb9iqg4Ecd9XoJIA==}
+  /@hono/node-server/0.2.4:
+    resolution: {integrity: sha512-oFIOpEnikeCLTfU3PXMdWTB7gglkmtrXu7e88Tr4BPVOIPLUgBmwnfj/LzqIVEpy2gSU/lcEZsmJyQxC+zkErQ==}
     dependencies:
       '@remix-run/web-fetch': 4.3.2
       '@remix-run/web-file': 3.0.2
@@ -99,7 +99,7 @@ packages:
     resolution: {integrity: sha512-7O+FbCihrB5WGbFYesctwmTKae6rOiIzmz1icreWJ+0aA7LJfuqhEso2T9ncpcFtzMQtzXf2QGGueWJGTYsqrA==}
     dependencies:
       function-bind: 1.1.1
-      get-intrinsic: 1.1.3
+      get-intrinsic: 1.2.0
     dev: false
 
   /data-uri-to-buffer/3.0.1:
@@ -154,8 +154,8 @@ packages:
     resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
     dev: false
 
-  /get-intrinsic/1.1.3:
-    resolution: {integrity: sha512-QJVz1Tj7MS099PevUG5jvnt9tSkXN8K14dxQlikJuPt4uD9hHAHjLyLBiLR5zELelBdD9QNRAXZzsJx0WaDL9A==}
+  /get-intrinsic/1.2.0:
+    resolution: {integrity: sha512-L049y6nFOuom5wGyRc3/gdTLO94dySVKRACj1RmJZBQXlbTMhtNIgkWkUHq+jYmZvKf14EW1EoJnnjbmoHij0Q==}
     dependencies:
       function-bind: 1.1.1
       has: 1.0.3
@@ -165,7 +165,7 @@ packages:
   /gopd/1.0.1:
     resolution: {integrity: sha512-d65bNlIadxvpb/A2abVdlqKqV563juRnZ1Wtk6s1sIR8uNsXR70xqIzVqxVf1eTqDunwT2MkczEeaezCKTZhwA==}
     dependencies:
-      get-intrinsic: 1.1.3
+      get-intrinsic: 1.2.0
     dev: false
 
   /has-symbols/1.0.3:
