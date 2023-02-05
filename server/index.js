@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { serve, serveStatic } from "@hono/node-server"; // Write above `Hono`
+import { serve } from "@hono/node-server"; // Write above `Hono`
+import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import fs from "fs";
