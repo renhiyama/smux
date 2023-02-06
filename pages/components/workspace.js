@@ -90,10 +90,16 @@ export default function Workspace({}) {
   function createProject() {
     let $ = document.querySelector.bind(document);
     let inputEl = $("input[placeholder='PROJECT']");
+    let gitEl = $("input[placeholder='GIT-URL']");
+    let button = $("#createProjectButton");
+    if (gitEl.value.length > 0) {
+      button.innerText = "Cloning...";
+      button.disabled = true;
+    }
     fetch(
       `http://${localStorage.getItem("host")}:${localStorage.getItem(
         "port"
-      )}/projects/new`,
+      )}/projects/${gitEl.value.length > 0 ? "clone" : "new"}`,
       {
         method: "POST",
         headers: {
@@ -101,6 +107,7 @@ export default function Workspace({}) {
         },
         body: JSON.stringify({
           name: inputEl.value,
+          url: gitEl.value,
         }),
       }
     )
@@ -237,7 +244,7 @@ export default function Workspace({}) {
         <div className="mt-4">
           {/* list projects */}
           <h3 className="text-sm font-semibold uppercase">Projects</h3>
-          <div className="mt-4 grid lg:grid-cols-2 lg:max-w-md gap-4">
+          <div className="mt-4 grid lg:grid-cols-2 lg:max-w-md lg:gap-4">
             {projects.length > 0 ? (
               projects.map((project, index) => {
                 return (
@@ -447,20 +454,26 @@ export default function Workspace({}) {
                     <p className="text-sm text-slate-300">
                       Please provide a name for your new project. Consider not
                       using spaces in between for ease of access, and if
-                      possible, in lower-case too!
+                      possible, in lower-case too! Provide Git URL if you want
+                      to clone the project. Leave empty to create a blank
+                      project.
                     </p>
                     <input
                       placeholder="PROJECT"
                       className="mt-4 bg-gray-900 rounded-md focus:outline-none border-2 border-slate-700 focus:border-indigo-700 text-slate-300 py-2 px-4"
                       defaultValue="hello-world"
                     ></input>
+                    <input
+                      placeholder="GIT-URL"
+                      className="mt-4 bg-gray-900 rounded-md focus:outline-none border-2 border-slate-700 focus:border-indigo-700 text-slate-300 py-2 px-4"
+                    ></input>
                   </div>
-
                   <div className="mt-4">
                     <button
                       type="button"
                       className="text-white inline-flex text-lg justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       onClick={createProject}
+                      id="createProjectButton"
                     >
                       Create!
                     </button>
@@ -484,7 +497,7 @@ export default function Workspace({}) {
 
 function ProjectCard({ project, onClick }) {
   return (
-    <div
+    /*<div
       className="px-6 py-4 rounded-md bg-slate-900 border-2 border-slate-700 cursor-pointer"
       onClick={onClick}
       key={project}
@@ -492,6 +505,17 @@ function ProjectCard({ project, onClick }) {
       <div className="flex items-center justify-between">
         <span className="text-md font-black text-blue-500 truncate">
           {project}
+        </span>
+      </div>
+    </div>*/
+    <div
+      className="first:rounded-t-md last:rounded-b-md lg-rounded-md px-3 lg:px-6 py-3 lg:py-4 bg-slate-900 border border-slate-700 cursor-pointer"
+      onClick={onClick}
+      key={project}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-md font-black text-blue-500 truncate">
+          {project?.length > 25 ? project.substring(0, 22) + "..." : project}
         </span>
       </div>
     </div>

@@ -84,6 +84,29 @@ app.post("/projects/new", async (c) => {
   return c.json({ message: "Project created", name });
 });
 
+//clone a new project
+app.post("/projects/clone", async (c) => {
+  let body;
+  try {
+    body = await c.req.json();
+  } catch (e) {
+    return c.json({ error: "Invalid JSON" });
+  }
+  if (!body.url) {
+    return c.json({ error: "Missing url" });
+  }
+  let url = body.url;
+  let name = body.name;
+  let projectPath = path.join(homedir, "smux/projects", name);
+  if (fs.existsSync(projectPath)) {
+    return c.json({ error: "Project already exists" });
+  }
+  child_process.execSync(`git clone ${url} ${projectPath || ""}`, {
+    cwd: path.join(homedir, "smux/projects"),
+  });
+  return c.json({ message: "Project cloned", name });
+});
+
 // delete project
 app.delete("/projects/:project", async (c) => {
   let project = c.req.param("project");

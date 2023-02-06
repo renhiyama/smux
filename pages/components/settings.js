@@ -23,12 +23,17 @@ export default function Settings({}) {
         />
       </div>
       <div className="my-8 md:flex w-md text-slate-300">
-        <p>Background</p>
-        <input
-          className="mt-4 bg-gray-900 rounded-md focus:outline-none border-2 border-slate-700 focus:border-indigo-700 text-slate-300 py-2 px-4"
-          placeholder="Image URL"
-        ></input>
+        <p className="block my-auto md:px-4">Background</p>
+        <Input placeholder="Image URL" />
       </div>
     </div>
+  );
+}
+function Input({ name, placeholder }) {
+  return (
+    <input
+      className="block mt-4 md:my-auto bg-gray-900 rounded-md focus:outline-none border-2 border-slate-700 focus:border-indigo-700 text-slate-300 py-2 px-4 align-middle"
+      placeholder={placeholder}
+    ></input>
   );
 }

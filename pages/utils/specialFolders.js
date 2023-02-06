@@ -6,7 +6,7 @@ export function specialFolders(foldername) {
   let folder = null;
   switch (foldername) {
     case "node_modules":
-      folder = "node_modules";
+      folder = "node";
       break;
     case "app":
       folder = "app";

@@ -39,7 +39,9 @@ export default function Controls() {
       className="h-full py-4 col-span-8 lg:col-span-2 border-r border-slate-700"
     >
       <div className="flex px-4">
-        <h3 className="text-sm font-semibold uppercase mr-auto">Files</h3>
+        <h3 className="text-sm font-semibold uppercase mr-auto lg:pr-2">
+          Files
+        </h3>
         <ControlButton name="search" />
         <ControlButton name="refresh" />
         <ControlButton name="new-file" />
@@ -73,7 +75,7 @@ export default function Controls() {
         <ul
           className={`${
             isExpanded ? "" : "hidden"
-          } select-none overflow-auto max-h-screen`}
+          } select-none overflow-auto max-h-screen no-scrollbar`}
         >
           <Directory key={"__never_gonna_give_you_up__"} />
         </ul>

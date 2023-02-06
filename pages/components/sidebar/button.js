@@ -27,19 +27,20 @@ let icons = {
       <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"></path>
     </svg>
   ),
-  search: (
+  terminal: (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
       fill="none"
-      strokeLinecap="round"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="w-6 h-6"
     >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-      <circle cx="10" cy="10" r="7"></circle>
-      <path d="M21 21l-6 -6"></path>
-      <path d="M8 8l-2 2l2 2"></path>
-      <path d="M12 8l2 2l-2 2"></path>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
+      />
     </svg>
   ),
   "source-control": (
